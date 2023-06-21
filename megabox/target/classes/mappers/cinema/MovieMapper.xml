@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.my.megabox.movie.repository.IMovieDAO">
+	<select id="selectall"
+		resultType="com.my.megabox.movie.dto.MovieDTO">
+		SELECT * FROM MOVIE order by m_num
+	</select>
+	
+	<select id="titleSearch"
+		resultType="com.my.megabox.movie.dto.MovieDTO">
+		SELECT * FROM MOVIE where m_name LIKE '%'||#{m_name}||'%'
+	</select>
+
+	<select id="selectMovieNo" parameterType="Integer"
+		resultType="com.my.megabox.movie.dto.MovieDTO">
+		SELECT * FROM MOVIE WHERE m_num = #{m_num}
+	</select>
+
+	<select id="selectpost"
+		resultType="com.my.megabox.movie.dto.PostDTO">
+		SELECT * FROM posting ORDER BY p_num DESC
+	</select>
+	
+	<select id="selectpostNum"
+		resultType="com.my.megabox.movie.dto.PostDTO">
+		SELECT * FROM posting where m_num = #{m_num} ORDER BY p_num DESC
+	</select>
+	
+	<select id="selectpost_d" parameterType="Integer"
+		resultType="com.my.megabox.movie.dto.PostDTO">
+		SELECT * FROM posting where p_num = #{p_num}
+	</select>
+	 
+	<select id="selectcomment"
+		resultType="com.my.megabox.movie.dto.CommentDTO">
+		SELECT * FROM OPINION where m_num = #{m_num} ORDER BY o_num DESC
+	</select>
+	
+	<insert id="writeProc"
+		parameterType="com.my.megabox.movie.dto.PostDTO">
+		<selectKey keyProperty="p_num" resultType="int"
+			order="BEFORE">
+			SELECT nvl(max(p_num), 0)+1 FROM posting
+		</selectKey>
+		INSERT INTO posting VALUES
+		(#{p_num},#{p_time},#{p_image},#{p_content},0,#{u_num},#{m_num},#{u_id})
+	</insert>
+	
+	<delete parameterType="com.my.megabox.movie.dto.PostDTO" id="deletepost">
+		DELETE FROM posting WHERE p_num = #{p_num}
+	</delete>
+	
+	<insert id="replyProc"
+		parameterType="com.my.megabox.movie.dto.ReplyDTO">
+		<selectKey keyProperty="d_num" resultType="int"
+			order="BEFORE">
+			SELECT nvl(max(d_num), 0)+1 FROM reply
+		</selectKey>
+		INSERT INTO reply VALUES
+		(#{d_num},#{d_content},#{d_time},#{u_num},#{p_num},#{u_id})
+	</insert>
+	
+	<insert id="likeAdd"
+		parameterType="com.my.megabox.movie.dto.LikeDTO">
+		INSERT INTO like_info VALUES
+		(like_seq.nextval,#{l_time},#{u_num})
+	</insert>
+	
+ 	<select id="like" parameterType="int" resultType="com.my.megabox.movie.dto.LikeDTO">
+		SELECT * FROM like_info where u_num = #{u_num}
+	</select>
+	
+	<delete parameterType="com.my.megabox.movie.dto.LikeDTO" id="likeCancel">
+		DELETE FROM like_info WHERE l_num=#{l_num} and u_num=#{u_num}
+	</delete>
+	
+ 	<update parameterType="int" id="upLike">
+ 		UPDATE MOVIE SET m_like=m_like+1 WHERE m_num=#{m_num} 
+ 	</update>
+ 	
+ 	<update parameterType="int" id="downLike">
+ 		UPDATE MOVIE SET m_like=m_like-1 WHERE m_num=#{m_num} 
+ 	</update>
+
+
+</mapper>

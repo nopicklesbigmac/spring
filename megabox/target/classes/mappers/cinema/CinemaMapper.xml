@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.my.megabox.cinema.repository.ICinemaDAO">
+	<select id="selectstate" parameterType="String" resultType="com.my.megabox.cinema.dto.CinemaDTO">
+		SELECT * FROM cinema WHERE c_state LIKE #{c_state}||'%' ORDER BY C_NUM
+	</select>
+	
+	<select id="selectall" resultType="com.my.megabox.cinema.dto.CinemaDTO">
+		SELECT * FROM cinema ORDER BY C_NUM
+	</select>
+	
+	<select id="selectbrchNo"  parameterType="Integer" resultType="com.my.megabox.cinema.dto.CinemaDTO">
+		SELECT * FROM cinema WHERE c_num = #{c_num}
+	</select>
+	
+	<select id="facility"  parameterType="Integer" resultType="com.my.megabox.cinema.dto.FacilityDTO">
+		SELECT f_num,f_facility FROM facility WHERE c_num = #{c_num}
+	</select>
+	
+	<select id="floor"  parameterType="Integer" resultType="com.my.megabox.cinema.dto.FloorDTO">
+		SELECT f_num,f_floor FROM floor WHERE c_num = #{c_num}
+	</select>
+
+	<select id="showCinema" parameterType="String" resultType="com.my.megabox.cinema.dto.CinemaDTO">
+		SELECT * 
+		FROM CINEMA 
+		WHERE C_NAME = #{cName}
+	</select> 
+	
+	<select id="showFloor" parameterType="String" resultType="com.my.megabox.cinema.dto.FloorDTO">
+		SELECT FL.* 
+		FROM FLOOR FL JOIN CINEMA C 
+		ON C.C_NAME = #{cName} AND FL.C_NUM = C.C_NUM 
+		ORDER BY FL.F_NUM
+	</select>
+	
+	<select id="showFacility" parameterType="String" resultType="com.my.megabox.cinema.dto.FacilityDTO">
+		SELECT FA.* 
+		FROM FACILITY FA JOIN CINEMA C 
+		ON C.C_NAME = #{cName} AND FA.C_NUM = C.C_NUM 
+		ORDER BY FA.F_NUM
+	</select>
+	
+	<select id="sendAllByCinema" parameterType="Map" resultType="com.my.megabox.common.dto.AllDTO">
+		SELECT R.*, S.S_NAME, S.S_SEAT, M.M_NAME, M.M_AGE, M.M_R_TIME, C.C_NUM
+		FROM RUNNING R 
+		JOIN SCREEN S 
+		ON R.S_NUM = S.S_NUM AND TO_DATE(R.R_DATE, 'YYYY.MM.DD') = TO_DATE(#{day}, 'YYYY.MM.DD') AND  <![CDATA[SYSDATE - TO_DATE(CONCAT(R.R_DATE, R.R_START), 'YYYY-MM-DD HH24:MI:SS') < 0]]>
+        JOIN MOVIE M
+        ON R.M_NUM = M.M_NUM
+		JOIN CINEMA C 
+		ON R.C_NUM = C.C_NUM AND C.C_NAME = #{cName}
+		ORDER BY M.M_NUM, S.S_NUM, R.R_START
+	</select>
+	
+</mapper>

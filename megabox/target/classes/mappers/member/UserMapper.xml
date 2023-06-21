@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.my.megabox.member.repository.MemberDAO">
+	<select id="selectId" parameterType="String" resultType="com.my.megabox.member.dto.MemberDTO" >
+		SELECT * FROM user_info WHERE u_id=#{id, jdbcType=VARCHAR}
+	</select>
+	
+	<!-- 무비타임라인의 '보고싶어' (본영화는 YMList로) -->
+	<select id="lList" parameterType="int" resultType="com.my.megabox.movie.dto.LikeDTO">
+		select * from like_info where u_num=#{u_num}
+	</select>
+	
+	<select id="YMList" parameterType="int" resultType="com.my.megabox.booking.dto.BookingDTO">
+		SELECT * FROM BOOKING WHERE B_CONDITION = 'b' AND U_NUM = #{uNum} ORDER BY B_NUM
+	</select>
+	
+	<select id="mInfo" parameterType="int" resultType="com.my.megabox.movie.dto.MovieDTO" >
+		SELECT * FROM MOVIE WHERE M_NUM = #{mNum}
+	</select>
+	
+	<select id="cInfo" parameterType="int" resultType="com.my.megabox.cinema.dto.CinemaDTO" >
+		SELECT C_NAME FROM CINEMA WHERE C_NUM = #{c_num}
+	</select>
+		
+	<select id="rInfo" parameterType="int" resultType="com.my.megabox.movie.dto.RunningDTO">
+		SELECT * FROM running WHERE r_num = #{r_num}
+	</select>
+	
+	<select id="sInfo" parameterType="int" resultType="com.my.megabox.movie.dto.ScreenDTO">
+		SELECT * FROM screen WHERE s_num = #{s_num}
+	</select>
+	
+	<select id="cList" parameterType="int" resultType="com.my.megabox.booking.dto.BookingDTO">
+		SELECT * FROM BOOKING WHERE B_CONDITION = 'c' AND U_NUM=#{num}
+	</select>
+	
+ 	<select id="selectBooking" parameterType="int" resultType="com.my.megabox.booking.dto.BookingDTO">
+		select a.b_fee, a.b_start, b.c_name, c.r_date, d.m_name, e.u_num from
+					booking a,
+					(select a.c_num, b.c_name from booking a, cinema b where a.c_num = b.c_num)b,
+					(select a.r_num, b.r_date from booking a, running b where a.r_num = b.r_num)c,
+					(select a.m_num, b.m_name from booking a, movie b where a.m_num = b.m_num)d,
+					(select u_num from booking)e
+					where a.b_num=#{b_num}
+	</select> 
+	
+	<update id="cancelBooking" parameterType="int">
+		UPDATE BOOKING SET B_CONDITION = 'c', B_DATE = to_char(sysdate, 'yyyy-mm-dd'), B_TIME = to_char(sysdate, 'yyyy.mm.dd hh24:mi') WHERE B_NUM = #{bNum}
+	</update>
+	
+	<select id="rNumAndBCnt" parameterType="int" resultType="com.my.megabox.booking.dto.BookingDTO">
+		SELECT R_NUM, B_S_CNT FROM BOOKING WHERE B_NUM = #{bNum}
+	</select>
+	
+	<update id="updateCnt" parameterType="com.my.megabox.booking.dto.BookingDTO">
+		UPDATE RUNNING SET R_ABLE = R_ABLE + #{b_s_cnt} WHERE R_NUM = #{r_num}
+	</update>
+	
+	<!-- 날짜별 내역 조회 / 시작 날짜, 끝 날짜 -->	
+	<select id="GMOptionList" resultType="com.my.megabox.booking.dto.BookingDTO">
+      SELECT C.C_NAME, B.* FROM BOOKING B JOIN CINEMA C ON B.C_NUM = C.C_NUM WHERE U_NUM = #{uNum} AND B_CONDITION = 'b' AND B_DATE BETWEEN TO_DATE(#{start},'yyyy.mm.dd') AND TO_DATE(#{end},'yyyy.mm.dd') ORDER BY B_TIME
+    </select>
+	
+	<select id="CCOptionList" resultType="com.my.megabox.booking.dto.BookingDTO">
+        SELECT C.C_NAME, B.* FROM BOOKING B JOIN CINEMA C ON B.C_NUM = C.C_NUM WHERE U_NUM = #{uNum} AND B_CONDITION = 'c' AND B_DATE BETWEEN TO_DATE(#{start},'yyyy.mm.dd') AND TO_DATE(#{end},'yyyy.mm.dd') ORDER BY B_TIME
+    </select>
+	
+	<select id="AllList" resultType="com.my.megabox.booking.dto.BookingDTO">
+		SELECT C.C_NAME, B.* FROM BOOKING B JOIN CINEMA C ON B.C_NUM = C.C_NUM WHERE U_NUM = #{uNum} AND B_DATE BETWEEN TO_DATE(#{start},'yyyy.mm.dd') AND TO_DATE(#{end},'yyyy.mm.dd') ORDER BY B_TIME
+	</select>
+	
+	<update id="chagePw" parameterType="com.my.megabox.member.dto.MemberDTO">
+		UPDATE user_info SET u_pw=#{pwnew} WHERE u_id=#{id}
+	</update>
+	
+	<update id="modifyUserInfo" parameterType="com.my.megabox.member.dto.MemberDTO">
+		UPDATE user_info SET u_email=#{u_email}, u_tel=#{u_tel}, u_m_agree=#{u_m_agree, jdbcType=VARCHAR} WHERE u_id=#{u_id, jdbcType=VARCHAR}
+	</update>
+	
+	<delete id="deleteMember" parameterType="String">
+		DELETE FROM user_info WHERE u_id=#{id}
+	</delete>
+	
+	<insert id="makeInquiry" parameterType="com.my.megabox.member.dto.InquiryDTO">
+		INSERT INTO inquiry VALUES(inquiry_seq.nextval, #{i_type}, #{i_title}, #{i_content}, #{i_image, jdbcType=VARCHAR}, #{u_name}, #{u_email}, #{u_tel}, #{u_num}, #{i_cinema}, to_char(sysdate, 'yyyy.mm.dd hh24:mi'))
+	</insert>
+		
+	<select id="IQList" parameterType="int" resultType="com.my.megabox.member.dto.InquiryDTO">
+		SELECT * FROM inquiry WHERE u_num=#{num}
+	</select>
+	
+	<select id="detailIQ" parameterType="int" resultType="com.my.megabox.member.dto.InquiryDTO">
+		SELECT * FROM inquiry WHERE i_num=#{i_num}
+	</select>
+	
+	<select id="AllListWithinMonth" resultType="com.my.megabox.booking.dto.BookingDTO">
+      SELECT C.C_NAME, B.* FROM BOOKING B JOIN CINEMA C ON B.C_NUM = C.C_NUM WHERE SYSDATE - TO_DATE(B.B_TIME, 'yyyy.mm.dd hh24:mi:ss') BETWEEN 0 AND 31 ORDER BY B.B_TIME
+    </select>
+    
+    <select id="PostList" parameterType="int" resultType="com.my.megabox.movie.dto.PostDTO">
+    	SELECT * FROM posting WHERE u_num = #{unum}
+    </select>
+    
+    <select id="alreadySaw" parameterType="int" resultType="com.my.megabox.booking.dto.BookingDTO">
+    	SELECT * FROM RUNNING R JOIN BOOKING B ON R.R_NUM = B.R_NUM WHERE SYSDATE - TO_DATE(CONCAT(R_DATE, R_END), 'yyyy.mm.dd hh24:mi:ss') > 0 AND B_CONDITION = 'b' AND U_NUM = #{uNum} ORDER BY B_TIME
+    </select>
+    
+    <delete id="unlikeMovie">
+    	DELETE FROM like_info WHERE l_num=#{m_num} and u_num=#{unum}
+    </delete>
+    
+    <update id="minusLike" parameterType="String">
+    	UPDATE movie SET m_like = m_like - 1 WHERE m_name=#{m_name}
+    </update>
+    
+    <select id="likenum" parameterType="int" resultType="int">
+    	select count(l_num) from like_info where u_num=#{unum}
+    </select>
+    
+    <select id="postnum" parameterType="String" resultType="int">
+    	select count(p_num) from posting where u_id=#{id}
+    </select>
+</mapper>

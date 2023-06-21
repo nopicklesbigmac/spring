@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.test.root.IMovieDAO">
+
+
+	<select id="selectall" resultType="com.test.root.MovieDTO">
+		SELECT * FROM MOVIE 
+	</select>
+	
+	
+	<select id="selectMovieNo"  parameterType="Integer" resultType="com.test.root.MovieDTO">
+		SELECT * FROM MOVIE WHERE m_num = #{m_num}
+	</select>
+	
+	
+	
+	
+
+	
+</mapper>

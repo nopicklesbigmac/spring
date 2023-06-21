@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.my.megabox.booking.repository.IBookingDAO">
+	<insert id="insertBookingInfo" parameterType="Map">
+       <selectKey keyColumn="R_START,R_END,R_DATE,C_NUM,S_NUM,M_NUM" keyProperty="rStart,rEnd,rDate,cNum,sNum,mNum" resultType="Map" order="BEFORE">
+           SELECT SUBSTR(R_START, 0, 5) R_START, SUBSTR(R_END, 0, 5) R_END, R_DATE, C_NUM, S_NUM, M_NUM FROM RUNNING WHERE R_NUM = #{rNum}
+       </selectKey>
+       INSERT INTO 
+       BOOKING(B_NUM, B_DATE, B_TIME, B_START, B_END, B_FEE, B_SEAT, B_S_CNT, C_NUM, S_NUM, M_NUM, U_NUM, R_NUM)
+       VALUES(BOOKING_SEQ.NEXTVAL, TO_CHAR(SYSDATE, 'YYYY-MM-DD'), TO_CHAR(SYSDATE, 'YYYY-MM-DD HH24:MI'), #{rStart}, #{rEnd}, #{fee}, #{seats}, #{seatCnt}, #{cNum}, #{sNum}, #{mNum}, #{uNum}, #{rNum})
+   </insert>
+   
+   <update id="updateAbleSeatNum" parameterType="Map">
+      UPDATE RUNNING 
+      SET R_ABLE = R_ABLE - #{seatCnt} 
+      WHERE R_NUM = #{rNum}
+   </update>
+   
+	<select id="sendAllByCinema" parameterType="Map" resultType="com.my.megabox.booking.dto.AllDTO">
+		SELECT R.*, S.S_NAME, S.S_SEAT, M.M_NAME, M.M_AGE, M.M_R_TIME, C.C_NUM
+		FROM RUNNING R 
+		JOIN SCREEN S ON R.S_NUM = S.S_NUM AND TO_DATE(R.R_DATE, 'YYYY.MM.DD') = TO_DATE(#{day}, 'YYYY.MM.DD') AND  <![CDATA[SYSDATE - TO_DATE(CONCAT(R.R_DATE, R.R_START), 'YYYY-MM-DD HH24:MI:SS') < 0]]>
+        JOIN MOVIE M ON R.M_NUM = M.M_NUM
+		JOIN CINEMA C ON R.C_NUM = C.C_NUM AND C.C_NAME = #{cName}
+		ORDER BY M.M_NUM, S.S_NUM, R.R_START
+	</select>
+	
+	<select id="sendAllByMovieAndState" parameterType="Map" resultType="com.my.megabox.booking.dto.AllDTO">
+		SELECT * 
+		FROM RUNNING R 
+		JOIN SCREEN S ON R.S_NUM = S.S_NUM AND R.M_NUM = #{mNum} AND TO_DATE(R.R_DATE, 'YYYY.MM.DD') = TO_DATE(#{day}, 'YYYY.MM.DD') AND <![CDATA[SYSDATE - TO_DATE(CONCAT(R.R_DATE, R.R_START), 'YYYY-MM-DD HH24:MI:SS') < 0]]>
+		JOIN CINEMA C ON R.C_NUM = C.C_NUM AND C.C_STATE LIKE '%'||#{sName}||'%'
+		ORDER BY C.C_NUM, S.S_NUM, R.R_START
+	</select>
+	
+	<select id="selectMovieNumByName" parameterType="String" resultType="int">
+		SELECT * 
+		FROM (SELECT M_NUM FROM MOVIE WHERE M_NAME = #{mName} ORDER BY M_NUM)I 
+		WHERE ROWNUM = 1
+	</select>
+	
+	<select id="selectCondition" parameterType="Integer" resultType="com.my.megabox.booking.dto.AllDTO">
+		SELECT C.C_NAME, S.S_NAME, S.S_SEAT, M.M_NAME, M.M_AGE, M.M_POSTER, R.R_DATE, R.R_START, R.R_END 
+		FROM RUNNING R 
+		JOIN CINEMA C ON R.C_NUM = C.C_NUM 
+		JOIN SCREEN S ON R.S_NUM = S.S_NUM 
+		JOIN MOVIE M ON R.M_NUM = M.M_NUM 
+		WHERE R_NUM = #{rNum}
+	</select>
+	
+	<select id="sendTicketingInfo" parameterType="Map" resultType="com.my.megabox.booking.dto.AllDTO">
+		SELECT C.C_NAME, S.S_NAME, S.S_SEAT, M.M_NAME, M.M_POSTER, M.M_AGE, R.*
+		FROM RUNNING R 
+		JOIN MOVIE M ON R.M_NUM = M.M_NUM 
+		JOIN SCREEN S ON R.S_NUM = S.S_NUM 
+		JOIN CINEMA C ON R.C_NUM = C.C_NUM 
+		WHERE C.C_NAME = #{cName} AND S.S_NAME = #{sName} AND M_NAME = #{mName} AND R.R_DATE = #{day} AND <![CDATA[SYSDATE - TO_DATE(CONCAT(R.R_DATE, R.R_START), 'YYYY-MM-DD HH24:MI:SS') < 0]]>
+		ORDER BY S.S_NAME, R_START
+	</select>
+	
+	<select id="selectBookedSeat" parameterType="Integer" resultType="com.my.megabox.booking.dto.BookingDTO">
+		SELECT B_SEAT
+		FROM BOOKING
+		WHERE R_NUM = #{rNum} AND B_CONDITION = 'b'
+	</select>
+
+</mapper>

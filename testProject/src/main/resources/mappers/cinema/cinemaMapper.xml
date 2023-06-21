@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.test.root.ICinemaDAO">
+
+	<select id="selectstate" parameterType="String" resultType="com.test.root.CinemaDTO">
+		SELECT * FROM cinema WHERE c_tstate LIKE #{c_state}||'%'
+	</select>
+	<select id="selectall" resultType="com.test.root.CinemaDTO">
+		SELECT * FROM cinema 
+	</select>
+	
+	<select id="selectbrchNo"  parameterType="Integer" resultType="com.test.root.CinemaDTO">
+		SELECT * FROM cinema WHERE c_num = #{c_num}
+	</select>
+	
+	<select id="facility"  parameterType="Integer" resultType="com.test.root.FacilityDTO">
+		SELECT f_num,f_facility FROM facility WHERE c_num = #{c_num}
+	</select>
+	
+	<select id="floor"  parameterType="Integer" resultType="com.test.root.FloorDTO">
+		SELECT f_num,f_floor FROM floor WHERE c_num = #{c_num}
+	</select>
+	
+</mapper>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.my.megabox.movie.repository.IMovieDAO">
+	<select id="selectrun"
+		resultType="com.my.megabox.movie.dto.RunningDTO">
+		SELECT * FROM running where c_num = #{c_num} and m_num = #{m_num} and r_date = #{r_date} ORDER BY r_start ASC
+	</select>
+
+	<select id="selectbooking"
+		resultType="com.my.megabox.movie.dto.MovieDTO">
+		SELECT * FROM movie where m_num = #{m_num}
+	</select>
+	
+	<select id="bookinguser"
+		resultType="com.my.megabox.booking.dto.BookingDTO">
+		select * from booking where u_num = #{u_num} and b_condition = 'b'
+	</select>
+
+	<select id="selectScreen"
+		resultType="com.my.megabox.movie.dto.ScreenDTO">
+		SELECT * FROM Screen where s_num = #{s_num}
+	</select>
+	
+	
+</mapper>
